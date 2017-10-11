@@ -15,8 +15,6 @@ import java.io.InputStreamReader;
  */
 
 public class ShaderUtil {
-
-
     private static final String TAG = "ShaderUtil";
 
     //从资源文件读入文本
