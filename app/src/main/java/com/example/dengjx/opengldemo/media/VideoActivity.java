@@ -41,7 +41,6 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback ,C
          mBtnStart.setOnClickListener(new View.OnClickListener() {
              @Override
              public void onClick(View view) {
-
                  try {
                      isStart = true;
                      mVideoEncoder.start();
@@ -133,10 +132,8 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback ,C
 
     @Override
     public void onPreviewFrame(byte[] bytes, Camera camera) {
-        long time = System.currentTimeMillis();
-        Log.d(TAG,"bytes:"+bytes);
-        if(isStart){
-            mVideoEncoder.feedData(bytes,time);
-        }
+
+            mVideoEncoder.feedData(bytes);
+
     }
 }

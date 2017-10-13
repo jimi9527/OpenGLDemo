@@ -87,12 +87,11 @@ public class VideoEncoder implements Runnable {
     /**
      * 由外部喂入一帧数据
      * @param data RGBA数据
-     * @param timeStep camera附带时间戳
      */
-    public void feedData(final byte[] data, final long timeStep){
+    public void feedData(final byte[] data){
+
         hasNewData=true;
         nowFeedData=data;
-        nowTimeStep=timeStep;
     }
 
     byte[] yuv;
@@ -146,22 +145,28 @@ public class VideoEncoder implements Runnable {
     private void readOutputData(byte[] data) throws IOException {
         int index = mMediaCodec.dequeueInputBuffer(-1);
         Log.d(TAG,"index:"+index);
-        if(index > 0){
+        if(index >= 0){
             if(hasNewData){
                 if(yuv == null){
                     yuv = new byte[mVideoWidth * mVideoHeight * 3 /2];
                 }
                 rgbaToYuv(data,mVideoWidth,mVideoHeight,yuv);
+
             }
             ByteBuffer buffer = getInputBuffer(index);
             buffer.clear();
             buffer.put(yuv);
-            mMediaCodec.queueInputBuffer(index,0,yuv.length,(System.nanoTime()-nowTimeStep)/1000,0);
+            Log.d(TAG,"yuv.length:"+yuv.length);
+            Log.d(TAG,"(System.nanoTime()-nowTimeStep):"+(System.nanoTime()-nowTimeStep)/1000);
+            mMediaCodec.queueInputBuffer(index,0,yuv.length,(System.nanoTime()-nowTimeStep)/1000,
+                    mStartFlag?0:MediaCodec.BUFFER_FLAG_END_OF_STREAM);
 
         }
         MediaCodec.BufferInfo mInfo = new MediaCodec.BufferInfo();
         int outIndex = mMediaCodec.dequeueOutputBuffer(mInfo , 0);
-        while (outIndex > 0){
+        Log.d(TAG,"outIndex:"+outIndex);
+        while (outIndex >= 0){
+
             ByteBuffer buffer = getOutputBuffer(outIndex);
             byte[] temp=new byte[mInfo.size];
             buffer.get(temp);
